@@ -2,6 +2,7 @@ import logging
 
 from .scheduler import Scheduler
 from schedule.tasks.sleeper import Sleeper
+from schedule.tasks.controller import Controller
 from .worker import Worker
 from multiprocessing import Process
 
@@ -19,8 +20,9 @@ if __name__ == "__main__":
     p1 = Worker(scheduler)
     p2 = Worker(scheduler)
     scheduler.schedule(Sleeper())
+    scheduler.schedule(Controller())
+    scheduler.schedule(Controller())
     scheduler.schedule(Sleeper(2))
-    scheduler.schedule(Sleeper(3))
     scheduler.schedule(Sleeper(4))
     scheduler.schedule(Sleeper(5))
     scheduler.schedule(Sleeper(6))

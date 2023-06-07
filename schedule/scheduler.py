@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 import logging
 
+from .tasks.sleeper import Sleeper
 from .job import Job
 
 class Scheduler:
@@ -27,4 +28,9 @@ class Scheduler:
 
         if reason == 'sleep':
             self.logger.debug(f'Scheduler: Sleeper slept. Data: {data}')
+        if reason == 'controller':
+            if data == 'sleeper':
+                self.task_queue.put(Sleeper())
+            else:
+                raise RuntimeError
         return
