@@ -16,8 +16,13 @@ class Worker(Process):
 
     def run(self):
         self.logger.debug('Worker: starts.')
-        while not self.scheduler.task_queue.empty():
-            job = self.scheduler.pop()
+        while True:
+            try:
+                job = self.scheduler.pop()
+            except Exception as ex:
+                self.logger.debug(f'Worker: loop broken because of: {ex}')
+                break
+
             task = job.run()
 
             while True:
@@ -28,8 +33,9 @@ class Worker(Process):
                     self.logger.debug(f'Worker: Task {type(task)} finished through StopIteration.')
                     break    
                 except Exception as ex:
-                    self.logger.debug(f'Worker: Task {type(task)} finished because of: {ex}')
-                    break
+                    self.logger.debug(f'Worker: Task {type(task)} breaks because of: {ex}')
+                    raise Exception(ex)
+                    
 
         self.logger.debug('Worker: exits.')
 

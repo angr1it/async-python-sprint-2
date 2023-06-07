@@ -16,16 +16,16 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     logger.debug('Main: starts.')
-    scheduler = Scheduler()
+    scheduler = Scheduler(max_priority=4)    
     p1 = Worker(scheduler)
     p2 = Worker(scheduler)
-    scheduler.schedule(Sleeper())
+    scheduler.schedule(Sleeper(1))
     scheduler.schedule(Controller())
-    scheduler.schedule(Controller())
+    scheduler.schedule(Controller(), 2)
     scheduler.schedule(Sleeper(2))
+    scheduler.schedule(Sleeper(3), 2)
     scheduler.schedule(Sleeper(4))
     scheduler.schedule(Sleeper(5))
-    scheduler.schedule(Sleeper(6))
     p1.start()
     p2.start()
 
