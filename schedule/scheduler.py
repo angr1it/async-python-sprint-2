@@ -1,15 +1,30 @@
+from multiprocessing import Queue
+import logging
+
+from .job import Job
+
 class Scheduler:
-    def __init__(self, pool_size=10):
-        pass
+    """
+    Controls task queue;
+    producer;
+    """
+    def __init__(self):
+        self.task_queue = Queue()
+        self.logger = logging.getLogger()
 
-    def schedule(self, task):
-        pass
+    def schedule(self, task: Job):
+        self.task_queue.put(task)
 
-    def run(self):
-        pass
+    def pop(self) -> Job:
+        return self.task_queue.get()
+    
+    def recv(self, reason, data):
+        """
+        Receive result of task; 
+        decide what to do next; 
+        Put another task in the queue according to some logic? Or do nothing?
+        """
 
-    def restart(self):
-        pass
-
-    def stop(self):
-        pass
+        if reason == 'sleep':
+            self.logger.debug(f'Scheduler: Sleeper slept. Data: {data}')
+        return
