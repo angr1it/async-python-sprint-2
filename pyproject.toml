@@ -7,3 +7,4 @@ py-modules = []
 
 [project]
 name = 'schedule'
+version = '1.0'
