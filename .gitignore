@@ -139,3 +139,9 @@ dmypy.json
 # VisualStudioCode Patch
 # Ignore all local history of files
 **/.history
+
+
+data/*
+# State generated files
+status*.txt
+init*.json

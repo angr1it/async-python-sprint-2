@@ -2,14 +2,34 @@ import time
 
 from ..job import Job
 
-
 class Sleeper(Job):
-    def __init__(self, s = 1, start_at="", max_working_time=-1, tries=0, dependencies=[]):
-        super().__init__()
-        self.s = s
 
-    def run(self):
-        self.logger.debug('Sleeper: sleeps..')
-        time.sleep(self.s)
-        yield ('sleep', self.s)
-        self.logger.debug('Sleeper: exits.')
+    def __init__(self, epoch_time = 1, epochs = 1, **kwargs) -> None:
+        self.epoch_time = epoch_time
+        self.epochs = epochs
+        super().__init__(**kwargs)
+
+    def as_dict(self):
+        data = {
+            'start_at': self.start_at,
+            'max_working_time': self.max_working_time,
+            'tries': self.tries,
+            'dependencies': self.dependencies,
+            'status_file': self.status_file,
+            'epoch_time': self.epoch_time,
+            'epochs': self.epochs
+        }
+
+        return data
+    
+    def _run(self, start_with = 0):
+        self.logger.debug('Sleeper: starts.')
+
+        for i in range(start_with, self.epochs):
+            self.logger.debug(f'Sleeper: sleeps.. {self.epoch_time}s')
+            time.sleep(self.epoch_time)
+
+            self._pass_stage(i)
+            yield 'none', None
+
+        self.logger.debug('Sleeper: leaves.')
