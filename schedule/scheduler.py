@@ -1,7 +1,7 @@
 import time
 import logging
-from typing import *
 import selectors
+from typing import List, Tuple, Generator
 
 from .state import SchedulerState
 from .tasks.cleaner import Cleaner
@@ -16,14 +16,14 @@ from .exceptions import (
 
 
 class Scheduler:
-    def __init__(self, jobs: list[Job] = []):
+    def __init__(self, jobs: List[Job] = []):
         self.logger = logging.getLogger()
 
         self.selector = selectors.DefaultSelector()
 
         self.state = SchedulerState(jobs, scheduler=self)
     
-    def add_tasks(self, jobs: list[Job]) -> None:
+    def add_tasks(self, jobs: List[Job]) -> None:
         self.state.add_to_waiting(jobs)
 
     def try_start_all(self):
@@ -93,7 +93,7 @@ class Scheduler:
         # TODO: Things to do before event loop ends: returns True
         return False
     
-    def continue_task(self, task: tuple[Job, Generator]):
+    def continue_task(self, task: Tuple[Job, Generator]):
         self.state.continue_task(task)
     
     def sock_recv(self, sock, n):

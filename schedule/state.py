@@ -2,7 +2,7 @@ import logging
 import json
 import importlib
 from collections import deque
-from typing import *
+from typing import List, Generator, Tuple
 
 from .job import Job
 
@@ -10,7 +10,7 @@ FOLDER = 'status'
 TASK_FOLDER = 'status/tasks'
 
 class SchedulerState:
-    def __init__(self, waiting: list[Job] = [], scheduler = None) -> None:
+    def __init__(self, waiting: List[Job] = [], scheduler = None) -> None:
         self.logger = logging.getLogger()
         self.scheduler = scheduler
 
@@ -29,7 +29,7 @@ class SchedulerState:
         """
         self.scheduler = scheduler
     
-    def add_to_waiting(self, jobs: list[Job]) -> None:
+    def add_to_waiting(self, jobs: List[Job]) -> None:
         for job in jobs:
             self.waiting.append(job)
 
@@ -111,7 +111,7 @@ class SchedulerState:
         self.logger.debug(f'SchedulerState: Job {job} spawned task {task}')
         return True
     
-    def continue_task(self, task: tuple[Job, Generator]):
+    def continue_task(self, task: Tuple[Job, Generator]):
         self.tasks_to_run.append(task)
 
     def return_to_wait_job(self, job):

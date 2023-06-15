@@ -1,10 +1,11 @@
 from pathlib import Path
+from typing import List
 
 from ..job import Job
 
 class FolderMaster(Job):
 
-    def __init__(self, folder_list: list[str] = [], **kwargs) -> None:
+    def __init__(self, folder_list: List[str] = [], **kwargs) -> None:
         self.folder_list = folder_list
         super().__init__(**kwargs)
 

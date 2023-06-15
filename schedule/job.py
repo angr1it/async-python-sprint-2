@@ -2,6 +2,7 @@ import os
 import logging
 import json
 from datetime import datetime, timedelta
+from typing import List
 
 from .exceptions import (
     TimeOutGenerator,
@@ -12,7 +13,7 @@ from .exceptions import (
 TASK_FOLDER = 'status/tasks'
 
 class Job(object):
-    def __init__(self, start_at='', max_working_time =-1, tries=0, dependencies: list[str] = [], status_file = '{}/status-{}.txt') -> None:
+    def __init__(self, start_at='', max_working_time =-1, tries=0, dependencies: List[str] = [], status_file = '{}/status-{}.txt') -> None:
         """_summary_
 
         Args:
