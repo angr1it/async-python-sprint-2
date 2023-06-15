@@ -1,6 +1,8 @@
 import time
+import random
 
 from ..job import Job
+from ..exceptions import SleeperFailed
 
 class Sleeper(Job):
 
@@ -26,6 +28,12 @@ class Sleeper(Job):
         self.logger.debug('Sleeper: starts.')
 
         for i in range(start_with, self.epochs):
+
+            # Test retrying
+            if random.randint(0, self.tries) > self.tries/2:
+                self.logger.error(f'Sleeper: task failed! Returning...')
+                raise SleeperFailed()
+            
             self.logger.debug(f'Sleeper: sleeps.. {self.epoch_time}s')
             time.sleep(self.epoch_time)
 

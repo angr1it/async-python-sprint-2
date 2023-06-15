@@ -142,6 +142,5 @@ dmypy.json
 
 
 data/*
-# State generated files
-status*.txt
-init*.json
+status/tasks/*
+!status/tasks/.gitkeep

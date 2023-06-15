@@ -9,7 +9,9 @@ class Cleaner(Job):
         super().__init__(**kwargs)
 
     def run(self):
-        links = glob.glob('./status-*.txt')
+        links = []
+        links.extend(glob.glob('status/tasks/status-*.txt'))
+        links.extend(glob.glob('status/tasks/init-*.json'))
         for link in links:
             os.remove(link)
             self.logger.debug(f'Status file {link} removed.')

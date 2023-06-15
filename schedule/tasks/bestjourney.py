@@ -42,7 +42,7 @@ class BestJourney(Job):
         with open(f'{self.result_folder}/best_candidate.json', 'w') as file:
             json.dump({'best_candidate': data[0]}, file)
 
-        self.logger.debug(f'BestJourney: Best candidate found. Result written into {self.result_folder}/best_candidate.json')
+        self.logger.info(f'BestJourney: Best candidate found. Result written into {self.result_folder}/best_candidate.json')
 
         yield 'none', None
 

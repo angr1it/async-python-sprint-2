@@ -1,19 +1,6 @@
-import json
-import io
-
-from http.client import HTTPResponse
-from io import StringIO
-
-from urllib.request import urlopen
-
 from http.client import HTTPResponse
 from io import BytesIO
-
-from datetime import datetime, timedelta
-from pprint import pformat
-import socket, ssl
-import logging
-
+import socket
 
 from ..scheduler import Scheduler, TimeOutGenerator
 from ..job import Job

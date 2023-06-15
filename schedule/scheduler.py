@@ -1,9 +1,7 @@
 import time
 import logging
 from typing import *
-from collections import deque
 import selectors
-from datetime import datetime, timedelta
 
 from .state import SchedulerState
 from .tasks.cleaner import Cleaner
@@ -15,7 +13,6 @@ from .exceptions import (
     ContinueLoop,
     ExitLoopWithWaitingJobsLeft
 )
-
 
 
 class Scheduler:
@@ -83,9 +80,11 @@ class Scheduler:
             raise RuntimeError('Starting a job that not found in waiting.')
         
         if not self.__job_dependencies__ready(job):
+            self.logger.debug(f'Job {self} dependencies not done.')
             return False
         
         if not job.ready():
+            self.logger.debug(f'Job {self} not ready to start.')
             return False
 
         return self.state.start_task(job)
@@ -127,6 +126,15 @@ class Scheduler:
         
         return max_wait_time
 
+    def try_retry_job(self, job: Job) -> None:
+
+        if job.tries > 0:
+            job.tries -= 1
+            self.state.return_to_wait_job(job)
+            self.logger.info(f'Retrying job {job}... Tries left: {job.tries}')
+        else:
+            self.logger.error(f'Job {job} has no tries left. Abandoning.')
+
     def run(self):
         self.logger.debug('Scheduler: Loop starts.')
 
@@ -159,9 +167,12 @@ class Scheduler:
                 try:
                     operation, arg = next(task)
                 except StopIteration:
-                    # TODO: change in status file; job ended -- shoudn't be restarted
-                    self.logger.debug(f'Scheduler: Task {task} stops.')
+                    self.logger.debug(f'Scheduler: Task {task} passed.')
                     self.on_task_pass(obj)
+                    continue
+                except Exception as ex:
+                    self.logger.debug(f'Scheduler: Task {task} stopped due: {ex}')
+                    self.try_retry_job(obj)
                     continue
 
                 self.logger.debug(f'Scheduler: Task {task} operation: {operation}')
@@ -189,5 +200,5 @@ class Scheduler:
                     time.sleep(sleep_time) # TODO: Maybe add sleeper task
                     # TODO: What if at this point there is something left in self.selector?
         
-        #Cleaner().run()
+        Cleaner().run()
         self.logger.debug('Scheduler: Loop ends.')

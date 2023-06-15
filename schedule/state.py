@@ -89,7 +89,7 @@ class SchedulerState:
         }
 
         with open(filepath, 'w') as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=4)
 
         self.logger.debug(f'SchedulerState: File {FOLDER}/status.txt updated')
 
@@ -113,6 +113,25 @@ class SchedulerState:
     
     def continue_task(self, task: tuple[Job, Generator]):
         self.tasks_to_run.append(task)
+
+    def return_to_wait_job(self, job):
+        
+        if job in self.passed:
+            raise RuntimeError('Cannot return passed job!')
+        
+        if job in self.waiting:
+            self.logger.error(f'SchedulerState: return_to_wait_job -- job {job} is already in waiting!')
+            return
+        
+        if job in self.running:
+            self.running.remove(job)
+        
+        for item in self.tasks_to_run:
+            if job == item[1]:
+                self.tasks_to_run.remove(item)
+                break
+
+        self.waiting.append(job)
 
     def pass_task(self, job: Job):
         if not job in self.running:

@@ -19,3 +19,6 @@ class ContinueLoop(Exception):
 
 class ExitLoopWithWaitingJobsLeft(Exception):
     pass
+
+class SleeperFailed(Exception):
+    pass
