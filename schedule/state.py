@@ -20,15 +20,6 @@ class SchedulerState:
         
         self.tasks_to_run = deque([])
 
-    def add_scheduler(self, scheduler):
-        """Need reference after load from status-file.
-        TODO: find a better way
-
-        Args:
-            scheduler (_type_): _description_
-        """
-        self.scheduler = scheduler
-    
     def add_to_waiting(self, jobs: List[Job]) -> None:
         for job in jobs:
             self.waiting.append(job)
@@ -111,9 +102,30 @@ class SchedulerState:
         self.logger.debug(f'SchedulerState: Job {job} spawned task {task}')
         return True
     
+    def job_in_task_runnung(self, job: Job) -> bool:
+        # TODO: maybe use hash or something
+        for item in self.tasks_to_run:
+            if job == item[0]:
+                return True
+            
+        return False
+
     def continue_task(self, task: Tuple[Job, Generator]):
+
+        if self.job_in_task_runnung(task[0]):
+            raise RuntimeError(f'Job {task[0]} is already included in tasks running!')
+        
         self.tasks_to_run.append(task)
 
+    def __remove_from_tasks_to_run(self, job: Job) -> bool:
+        # TODO: maybe use hash or something
+        for item in self.tasks_to_run:
+            if job == item[1]:
+                self.tasks_to_run.remove(item)
+                return True
+            
+        return False
+    
     def return_to_wait_job(self, job):
         
         if job in self.passed:
@@ -126,10 +138,7 @@ class SchedulerState:
         if job in self.running:
             self.running.remove(job)
         
-        for item in self.tasks_to_run:
-            if job == item[1]:
-                self.tasks_to_run.remove(item)
-                break
+        self.__remove_from_tasks_to_run(job)
 
         self.waiting.append(job)
 
@@ -141,10 +150,7 @@ class SchedulerState:
         self.running.remove(job)
         self.passed.append(job)
 
-        for item in self.tasks_to_run:
-            if job == item[1]:
-                self.tasks_to_run.remove(item)
-                break
+        self.__remove_from_tasks_to_run(job)
         
         self.logger.debug(f'SchedulerState: job {job} passed')
         self.dump()

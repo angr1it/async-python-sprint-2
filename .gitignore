@@ -144,3 +144,4 @@ dmypy.json
 data/*
 status/tasks/*
 !status/tasks/.gitkeep
+.vscode/*
