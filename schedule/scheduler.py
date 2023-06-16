@@ -1,3 +1,7 @@
+import sys
+if sys.platform.startswith('win'):
+    import win_inet_pton
+
 import time
 import logging
 import selectors
