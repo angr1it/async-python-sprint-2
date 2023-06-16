@@ -9,6 +9,7 @@ from .exceptions import (
     WaitForStart,
     TaskCompleted
 )
+from .utils import write_to_file
 
 TASK_FOLDER = 'status/tasks'
 
@@ -42,8 +43,9 @@ class Job(object):
         self.dependencies = dependencies
         self.status_file = status_file.format(TASK_FOLDER, id(self))
 
-        with open(self.status_file, 'w') as f:
-            f.write("{'status': 0, 'stage': 0}\n")
+        write_to_file(self.status_file, "{'status': 0, 'stage': 0}\n")
+        # with open(self.status_file, 'w') as f:
+        #     f.write("{'status': 0, 'stage': 0}\n")
 
         self.dump_init_data()
     
@@ -74,8 +76,9 @@ class Job(object):
         
         data = self.as_dict()
 
-        with open(f'{TASK_FOLDER}/init-{id(self)}.json', 'w') as outfile:
-            json.dump(data, outfile)
+        write_to_file(f'{TASK_FOLDER}/init-{id(self)}.json', json.dumps(data))
+        # with open(f'{TASK_FOLDER}/init-{id(self)}.json', 'w') as outfile:
+        #     json.dump(data, outfile)
 
     def load_init_data(self, filepath):
         """assumed that data already created by the class at the previous iteration is being loaded -- otherwise will lead to an error somewhere

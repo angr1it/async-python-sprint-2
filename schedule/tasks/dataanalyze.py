@@ -2,7 +2,7 @@ import json
 import glob
 
 from ..job import Job
-
+from ..utils import write_to_file
 
 class DataAnalyze(Job):
 
@@ -43,8 +43,11 @@ class DataAnalyze(Job):
             result['is_thunder'] = data['fact']['is_thunder']
 
             location = f'{self.result_folder}/{result["city"]}.json'
-            with open(location, 'w') as file:
-                json.dump(result, file)
+
+            write_to_file(location, json.dumps(result))
+
+            # with open(location, 'w') as file:
+            #     json.dump(result, file)
 
             self.logger.debug(f'DataAnalyze: result written in {location}')
             self._pass_stage(i)

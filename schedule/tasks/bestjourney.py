@@ -3,7 +3,7 @@ import glob
 from operator import itemgetter
 
 from ..job import Job
-
+from ..utils import write_to_file
 
 class BestJourney(Job):
 
@@ -39,8 +39,10 @@ class BestJourney(Job):
         data = sorted(data, key=itemgetter('wind_speed'))
         data = sorted(data, key=itemgetter('feels_like'), reverse=True)
 
-        with open(f'{self.result_folder}/best_candidate.json', 'w') as file:
-            json.dump({'best_candidate': data[0]}, file)
+        write_to_file(f'{self.result_folder}/best_candidate.json', json.dumps({'best_candidate': data[0]}))
+
+        # with open(f'{self.result_folder}/best_candidate.json', 'w') as file:
+        #     json.dump({'best_candidate': data[0]}, file)
 
         self.logger.info(f'BestJourney: Best candidate found. Result written into {self.result_folder}/best_candidate.json')
 

@@ -4,7 +4,7 @@ import socket
 
 from ..scheduler import Scheduler, TimeOutGenerator
 from ..job import Job
-
+from ..utils import write_to_file
 
 CITIES = {
     "MOSCOW": "code.s3.yandex.net/async-module/moscow-response.json",
@@ -71,8 +71,10 @@ class GetWeather(Job):
             response.begin()
             response_content = response.read(len(response_str)).decode('utf-8')
     
-            with open(self.result_folder_path + f'/{names[i]}.json', 'w') as file:
-                file.write(response_content)
+            write_to_file(self.result_folder_path + f'/{names[i]}.json', response_content)
+
+            # with open(self.result_folder_path + f'/{names[i]}.json', 'w') as file:
+            #     file.write(response_content)
 
             self._pass_stage(i)
             yield 'none', None

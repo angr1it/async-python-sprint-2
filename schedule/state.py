@@ -5,6 +5,7 @@ from collections import deque
 from typing import List, Generator, Tuple
 
 from .job import Job
+from .utils import write_to_file
 
 FOLDER = 'status'
 TASK_FOLDER = 'status/tasks'
@@ -79,8 +80,10 @@ class SchedulerState:
             'running': [ (type(item).__name__, id(item)) for item in self.running]
         }
 
-        with open(filepath, 'w') as file:
-            json.dump(data, file, indent=4)
+        write_to_file(filepath, json.dumps(data, indent=4))
+        
+        # with open(filepath, 'w') as file:
+        #     json.dump(data, file, indent=4)
 
         self.logger.debug(f'SchedulerState: File {FOLDER}/status.txt updated')
 

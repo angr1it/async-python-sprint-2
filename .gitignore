@@ -141,7 +141,6 @@ dmypy.json
 **/.history
 
 
-data/*
-status/tasks/*
-!status/tasks/.gitkeep
+data
+status
 .vscode/*
