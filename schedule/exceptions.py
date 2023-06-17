@@ -1,5 +1,3 @@
-
-
 class TimeOutGenerator(Exception):
     pass
 
@@ -7,8 +5,6 @@ class WaitForStart(Exception):
     pass
 
 class TaskCompleted(Exception):
-    """Task already completed previously.
-    """
     pass
 
 class NoJobsLeftWaiting(Exception):
@@ -21,4 +17,9 @@ class ExitLoopWithWaitingJobsLeft(Exception):
     pass
 
 class SleeperFailed(Exception):
+    pass
+
+class ExitLoopTaskCommand(Exception):
+    """Used specifically in order to break event loop from running task
+    """
     pass

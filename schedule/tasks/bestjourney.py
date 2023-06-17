@@ -18,7 +18,7 @@ class BestJourney(Job):
             'max_working_time': self.max_working_time,
             'tries': self.tries,
             'dependencies': self.dependencies,
-            'status_file': self.status_file,
+            'status_folder': self.status_folder,
             'data_folder': self.data_folder,
             'result_folder': self.result_folder
         }
@@ -41,8 +41,6 @@ class BestJourney(Job):
 
         write_to_file(f'{self.result_folder}/best_candidate.json', json.dumps({'best_candidate': data[0]}))
 
-        # with open(f'{self.result_folder}/best_candidate.json', 'w') as file:
-        #     json.dump({'best_candidate': data[0]}, file)
 
         self.logger.info(f'BestJourney: Best candidate found. Result written into {self.result_folder}/best_candidate.json')
 

@@ -7,13 +7,17 @@ from typing import List, Generator, Tuple
 from .job import Job
 from .utils import write_to_file
 
-FOLDER = 'status'
-TASK_FOLDER = 'status/tasks'
 
 class SchedulerState:
-    def __init__(self, waiting: List[Job] = [], scheduler = None) -> None:
+    def __init__(self, waiting: List[Job] = None, scheduler = None, status_folder = 'status') -> None:
+        if waiting is None:
+            waiting = []
+        
         self.logger = logging.getLogger()
         self.scheduler = scheduler
+
+        self.status_folder = status_folder
+        self.task_folder = f'{status_folder}/tasks'
 
         self.waiting = waiting
         self.passed = []
@@ -28,7 +32,11 @@ class SchedulerState:
         self.logger.debug(f'SchedulerState: Jobs {jobs} added to wait list.')
         self.dump()
 
-    def load(self, filepath = f'{FOLDER}/status.txt') -> None:
+    def load(self, filepath: str = None) -> None:
+        if filepath is None:
+            # из-за self.
+            filepath = f'{self.status_folder}/status.txt'
+        
         with open(filepath, 'r') as file:
             data = json.load(file)
 
@@ -40,20 +48,21 @@ class SchedulerState:
             self.running.append(job)
             self.tasks_to_run.append((
                 job,
-                job.run_on_load(f'{TASK_FOLDER}/status-{id}.txt')
+                # TODO: write status-{id}.txt path inside status.txt
+                job.run_on_load(f'{self.task_folder}/status-{id}.txt')
             ))
 
         for name, id in data['passed']:
             self.passed.append(self.__inst_job(name, id))
 
-        self.logger.debug(f'SchedulerState: state loaded from {FOLDER}/status.txt')
+        self.logger.debug(f'SchedulerState: state loaded from {self.status_folder}/status.txt')
             
     def __inst_job(self, class_name, id) -> Job:
 
         module = importlib.import_module(f'schedule.tasks.{class_name.lower()}')
         class_ = getattr(module, class_name)
 
-        with open(f'{TASK_FOLDER}/init-{id}.json', 'r') as file:
+        with open(f'{self.task_folder}/init-{id}.json', 'r') as file:
             args = json.load(file)
         
         if 'get_scheduler' in args:
@@ -70,10 +79,13 @@ class SchedulerState:
         
         job.dump_init_data()
 
-        self.logger.debug(f'SchedulerState: Job created from {TASK_FOLDER}/init-{id}.json')
+        self.logger.debug(f'SchedulerState: Job created from {self.task_folder}/init-{id}.json')
         return job
 
-    def dump(self, filepath = f'{FOLDER}/status.txt') -> None:
+    def dump(self, filepath: str = None) -> None:
+        if filepath is None:
+            filepath = f'{self.status_folder}/status.txt'
+
         data = {
             'waiting': [ (type(item).__name__, id(item)) for item in self.waiting],
             'passed': [ (type(item).__name__, id(item)) for item in self.passed],
@@ -81,11 +93,8 @@ class SchedulerState:
         }
 
         write_to_file(filepath, json.dumps(data, indent=4))
-        
-        # with open(filepath, 'w') as file:
-        #     json.dump(data, file, indent=4)
 
-        self.logger.debug(f'SchedulerState: File {FOLDER}/status.txt updated')
+        self.logger.debug(f'SchedulerState: File {self.status_folder}/status.txt updated')
 
     def start_task(self, job: Job):
 
@@ -149,7 +158,6 @@ class SchedulerState:
         if not job in self.running:
             return RuntimeError()
         
-        # 1. Transfer current task to passed;
         self.running.remove(job)
         self.passed.append(job)
 

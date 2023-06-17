@@ -11,23 +11,16 @@ from .exceptions import (
 )
 from .utils import write_to_file
 
-TASK_FOLDER = 'status/tasks'
 
 class Job(object):
-    def __init__(self, start_at='', max_working_time =-1, tries=0, dependencies: List[str] = [], status_file = '{}/status-{}.txt') -> None:
-        """_summary_
-
-        Args:
-            start_at (str, optional): datetime string in format '%m/%d/%y %H:%M:%S'. Defaults to '' -- start without delay.
-            max_working_time (int, optional): _description_. Defaults to -1.
-            tries (int, optional): _description_. Defaults to 0.
-            dependencies (list[str], optional): List of __name__s of jobs that has to pass before current job. Defaults to [].
-            status_file (list[str], optional): __. Defaults to 'status-{}.txt'.
-        """
+    def __init__(self, start_at='', max_working_time =-1, tries=0, dependencies: List[str] = None, status_folder = 'status/tasks') -> None:
+        if dependencies is None:
+            dependencies = []
+        
         self.logger = logging.getLogger()
-        self._init_new(start_at, max_working_time, tries, dependencies, status_file)
+        self._init_new(start_at, max_working_time, tries, dependencies, status_folder)
     
-    def _init_new(self, start_at, max_working_time, tries, dependencies, status_file):
+    def _init_new(self, start_at, max_working_time, tries, dependencies, status_folder):
         self.time_start = datetime.now()
 
         self.max_working_time = max_working_time
@@ -41,11 +34,12 @@ class Job(object):
         self.tries = tries
 
         self.dependencies = dependencies
-        self.status_file = status_file.format(TASK_FOLDER, id(self))
+        
+        self.status_folder = status_folder
+        self.stage_state_file = f'{status_folder}/status-{id(self)}.txt'
+        self.init_state_file = f'{status_folder}/init-{id(self)}.json'
 
-        write_to_file(self.status_file, "{'status': 0, 'stage': 0}\n")
-        # with open(self.status_file, 'w') as f:
-        #     f.write("{'status': 0, 'stage': 0}\n")
+        write_to_file(self.stage_state_file, "{'status': 0, 'stage': 0}\n")
 
         self.dump_init_data()
     
@@ -67,7 +61,7 @@ class Job(object):
             'max_working_time': self.max_working_time,
             'tries': self.tries,
             'dependencies': self.dependencies,
-            'status_file': self.status_file
+            'status_folder': self.status_folder
         }
 
         return data
@@ -76,9 +70,7 @@ class Job(object):
         
         data = self.as_dict()
 
-        write_to_file(f'{TASK_FOLDER}/init-{id(self)}.json', json.dumps(data))
-        # with open(f'{TASK_FOLDER}/init-{id(self)}.json', 'w') as outfile:
-        #     json.dump(data, outfile)
+        write_to_file(self.init_state_file, json.dumps(data))
 
     def load_init_data(self, filepath):
         """assumed that data already created by the class at the previous iteration is being loaded -- otherwise will lead to an error somewhere
@@ -101,7 +93,7 @@ class Job(object):
     
     @staticmethod
     def _read_stage_status(filepath) -> dict:
-        # TODO: rewrite probably
+        
         with open(filepath, 'rb') as f:
             try:
                 f.seek(-2, os.SEEK_END)
@@ -114,7 +106,7 @@ class Job(object):
         return json.loads(last_line.replace("\'", "\""))
     
     def resolve_meta(self):
-        # TODO: rewrite probably
+        
         if datetime.now() >  self.time_end and self.max_working_time > -1:
             raise TimeOutGenerator
         
@@ -126,11 +118,13 @@ class Job(object):
             'status': 1,
             'stage': stage
         }
-        with open(self.status_file, 'a') as f:
-            f.write(status.__str__() + '\n')
+
+        # write_to_file(self.status_file, json.dumps(status) + '\n')  -- path check already done via init
+        with open(self.stage_state_file, 'a') as f:
+            f.write(json.dumps(status) + '\n')
 
     def _end(self):
-        with open(self.status_file, 'a') as f:
+        with open(self.stage_state_file, 'a') as f:
             f.write("{'status': 2, 'stage': -1}")
     
     def run(self, start_with = 0):
@@ -142,28 +136,15 @@ class Job(object):
         pass
 
     def ready(self) -> bool:
-        # TODO: rewrite probably
+
         if self.start_at:
             if datetime.now() < self.start_at:
                 return False
         
         return True
 
-    def get_meta(self):
-        # TODO: rewrite probably
-        pass
-
-    def pause(self):
-        # TODO: rewrite probably
-        pass
-
-    def stop(self):
-        # TODO: rewrite probably
-        pass
-
     def run_on_load(self, status_filepath):
-        """Runs with paramas on load to continue;
-        """
+
         stage = Job.read_stage(status_filepath)
         if (stage == -1):
             raise TaskCompleted()

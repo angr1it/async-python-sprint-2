@@ -1,6 +1,5 @@
 import time
 import logging
-import multiprocessing
 
 from .scheduler import Scheduler
 from .tasks.getweather import GetWeather
@@ -8,6 +7,12 @@ from .tasks.sleeper import Sleeper
 from .tasks.foldermaster import FolderMaster
 from .tasks.dataanalyze import DataAnalyze
 from .tasks.bestjourney import BestJourney
+from .tasks.breaker import Breaker
+
+# Касательно TypeError: cannot pickle 'select.kqueue' object -- не поймал ошибку ни у себя (в .devcontainer указан docker образ), ни в тестах.
+# Подозреваю, что возникает при работе с multiprocessing, что не является необходимым для данного решения -- в предыдущей версии использовал только 
+# для того, чтобы показать прерывание выполнения sheduler и загрузки состояния из файлов.
+# Убрал из __main__; добавлю кейс в тесты.
 
 logger = logging.getLogger()
 logging.basicConfig(
@@ -28,16 +33,15 @@ def run_n_load():
     # Get запросы тут
     weather = GetWeather(result_folder_path = 'data/raw', scheduler=scheduler, dependencies = ['FolderMaster'])
     # Работа с файлами
-    analyze = DataAnalyze(data_folder = 'data/raw', result_folder = 'data/analyze', dependencies = ['FolderMaster', 'GetWeather'])
+    analyze = DataAnalyze(data_folder = 'data/raw', result_folder = 'data/analyze', dependencies = ['FolderMaster', 'GetWeather', 'Breaker'])
     bestJorney = BestJourney(data_folder='data/analyze', result_folder='data', dependencies=['DataAnalyze'])
+
+    breaker = Breaker(dependencies = ['FolderMaster'])
 
     sleeper = Sleeper(epochs = 5, tries = 5)
     
-    scheduler.add_tasks([weather, sleeper, folderMaster, analyze, bestJorney])
-    proc = multiprocessing.Process(target=scheduler.run, args=())
-    proc.start()
-    time.sleep(5)
-    proc.terminate()
+    scheduler.add_tasks([weather, sleeper, folderMaster, analyze, bestJorney, breaker])
+    scheduler.run()
 
     logger.debug('Main: Scheduler stopped.')
     time.sleep(5)

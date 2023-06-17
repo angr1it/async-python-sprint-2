@@ -17,7 +17,7 @@ class Sleeper(Job):
             'max_working_time': self.max_working_time,
             'tries': self.tries,
             'dependencies': self.dependencies,
-            'status_file': self.status_file,
+            'status_folder': self.status_folder,
             'epoch_time': self.epoch_time,
             'epochs': self.epochs
         }

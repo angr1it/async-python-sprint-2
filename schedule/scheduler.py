@@ -1,4 +1,6 @@
 import sys
+# Добавлено в качестве попытки решить ошибку (при работе с selectors) с WSAStartup при тестировании на windows: OSError: [WinError 10093]
+# что не решило проблему ==> OSError: [WinError 10022]. Пока отключаю тесты на win, т.к. нет времени искать другое решение.
 if sys.platform.startswith('win'):
     import win_inet_pton
 
@@ -15,12 +17,16 @@ from .exceptions import (
     WaitForStart,
     NoJobsLeftWaiting,
     ContinueLoop,
-    ExitLoopWithWaitingJobsLeft
+    ExitLoopWithWaitingJobsLeft,
+    ExitLoopTaskCommand
 )
 
 
 class Scheduler:
-    def __init__(self, jobs: List[Job] = []):
+    def __init__(self, jobs: List[Job] = None):
+        if jobs is None:
+            jobs = []
+
         self.logger = logging.getLogger()
 
         self.selector = selectors.DefaultSelector()
@@ -70,13 +76,15 @@ class Scheduler:
         
         return True
         
-    def on_task_pass(self, job):
+    def on_task_pass(self, job, start_all: bool = True, dump: bool = True):
 
         self.state.pass_task(job)
 
-        self.try_start_all()
+        if start_all:
+            self.try_start_all()
 
-        self.state.dump()
+        if dump:
+            self.state.dump()
 
     def try_start_task(self, job: Job):
 
@@ -144,6 +152,8 @@ class Scheduler:
 
         self.try_start_all()
 
+        clean_exit = False
+
         while True:
             for key, _ in self.selector.select(timeout=1):
                     data = key.data
@@ -160,7 +170,7 @@ class Scheduler:
                         obj.resolve_meta()
                 except TimeOutGenerator:
                     self.logger.debug(f'Scheduler: Task {task} timeout.')
-                    # TODO: to passed? TO waiting if retry
+                    self.try_retry_job(obj)
                     continue
                 except WaitForStart:
                     # TODO: Obsolete?
@@ -174,10 +184,15 @@ class Scheduler:
                     self.logger.debug(f'Scheduler: Task {task} passed.')
                     self.on_task_pass(obj)
                     continue
+                except ExitLoopTaskCommand:
+                    self.logger.debug(f'Scheduler: Task {task} ordered to break the loop. Passing current job and exiting..')
+                    self.on_task_pass(obj, start_all=False)
+                    break
                 except Exception as ex:
                     self.logger.debug(f'Scheduler: Task {task} stopped due: {ex}')
                     self.try_retry_job(obj)
                     continue
+                
 
                 self.logger.debug(f'Scheduler: Task {task} operation: {operation}')
                 if operation == 'wait_read':
@@ -196,13 +211,16 @@ class Scheduler:
                         continue
                     except NoJobsLeftWaiting:
                         self.logger.debug('Scheduler: There is nothing to do left.')
+                        clean_exit = True
                         break
                     except ExitLoopWithWaitingJobsLeft:
                         self.logger.error(f'Scheduler: jobs left waiting {self.state.waiting} could not be run!')
+                        clean_exit = True
                         break
 
                     time.sleep(sleep_time) # TODO: Maybe add sleeper task
                     # TODO: What if at this point there is something left in self.selector?
         
-        Cleaner().run()
+        if clean_exit:
+            Cleaner().run()
         self.logger.debug('Scheduler: Loop ends.')

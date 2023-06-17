@@ -15,7 +15,7 @@ class FolderMaster(Job):
             'max_working_time': self.max_working_time,
             'tries': self.tries,
             'dependencies': self.dependencies,
-            'status_file': self.status_file,
+            'status_folder': self.status_folder,
             'folder_list': self.folder_list
         }
 
