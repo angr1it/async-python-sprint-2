@@ -1,6 +1,7 @@
 {
     "python.analysis.extraPaths": [
-        "./scheduler"
+        "./scheduler",
+        "./schedule"
     ],
     "python.testing.unittestArgs": [
         "-v",

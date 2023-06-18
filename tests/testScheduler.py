@@ -1,11 +1,7 @@
 import unittest
 import filecmp
-from pathlib import Path
 import shutil
-import multiprocessing
-import time
 
-from schedule.job import Job
 from schedule.scheduler import Scheduler
 from schedule.tasks.bestjourney import BestJourney
 from schedule.tasks.dataanalyze import DataAnalyze

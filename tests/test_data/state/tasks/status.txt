@@ -1,0 +1,4 @@
+{'status': 0, 'stage': 0}
+{"status": 1, "stage": 0}
+{"status": 1, "stage": 1}
+{'status': 2, 'stage': -1}

@@ -48,10 +48,8 @@ class GetWeather(Job):
             port = 80
             path = '/' + path
 
-            #Надеюсь, всё это подразумевалось в задании...
             client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             
-            #TODO: do u actually need yield before connect?
             yield 'wait_write', client
             client.connect((hostname, port))
 
@@ -72,9 +70,6 @@ class GetWeather(Job):
             response_content = response.read(len(response_str)).decode('utf-8')
     
             write_to_file(self.result_folder_path + f'/{names[i]}.json', response_content)
-
-            # with open(self.result_folder_path + f'/{names[i]}.json', 'w') as file:
-            #     file.write(response_content)
 
             self._pass_stage(i)
             yield 'none', None

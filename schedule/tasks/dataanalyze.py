@@ -46,9 +46,6 @@ class DataAnalyze(Job):
 
             write_to_file(location, json.dumps(result))
 
-            # with open(location, 'w') as file:
-            #     json.dump(result, file)
-
             self.logger.debug(f'DataAnalyze: result written in {location}')
             self._pass_stage(i)
             yield 'none', None
