@@ -34,7 +34,6 @@ class SchedulerState:
 
     def load(self, filepath: str = None) -> None:
         if filepath is None:
-            # из-за self.
             filepath = f'{self.status_folder}/status.txt'
         
         with open(filepath, 'r') as file:
@@ -48,7 +47,6 @@ class SchedulerState:
             self.running.append(job)
             self.tasks_to_run.append((
                 job,
-                # TODO: write status-{id}.txt path inside status.txt
                 job.run_on_load(f'{self.task_folder}/status-{id}.txt')
             ))
 
@@ -104,7 +102,6 @@ class SchedulerState:
         self.waiting.remove(job)
         self.running.append(job)
         
-        # TODO: add params
         task = job.run()
 
         self.tasks_to_run.append((job, task))

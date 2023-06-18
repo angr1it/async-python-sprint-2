@@ -29,7 +29,7 @@ class Sleeper(Job):
 
         for i in range(start_with, self.epochs):
 
-            # Test retrying
+
             if random.randint(0, self.tries) > self.tries/2:
                 self.logger.error(f'Sleeper: task failed! Returning...')
                 raise SleeperFailed()

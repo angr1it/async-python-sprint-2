@@ -4,8 +4,7 @@ import shutil
 
 from schedule.scheduler import Scheduler
 from schedule.tasks.bestjourney import BestJourney
-from schedule.tasks.dataanalyze import DataAnalyze
-from schedule.tasks.foldermaster import FolderMaster   
+from schedule.tasks.dataanalyze import DataAnalyze 
 from schedule.tasks.sleeper import Sleeper
 from schedule.tasks.breaker import Breaker
 
@@ -48,7 +47,6 @@ class TestScheduler(unittest.TestCase):
 
         self.assertTrue(filecmp.cmp('tests/test_results/analyze/Moscow.json', 'tests/test_data/analyze/Moscow.json'))
         self.assertTrue(filecmp.cmp('tests/test_results/best_candidate.json', 'tests/test_data/best_candidate.json'))
-
 
 if __name__ == '__main__':
     unittest.main()

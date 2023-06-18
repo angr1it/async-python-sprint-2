@@ -37,7 +37,7 @@ class Scheduler:
         self.state.add_to_waiting(jobs)
 
     def try_start_all(self):
-        #iterate through copy
+
         for job in self.state.waiting[:]:
             self.try_start_task(job)
 
@@ -100,10 +100,6 @@ class Scheduler:
             return False
 
         return self.state.start_task(job)
-
-    def on_update(self):
-        # TODO: Things to do before event loop ends: returns True
-        return False
     
     def continue_task(self, task: Tuple[Job, Generator]):
         self.state.continue_task(task)
@@ -218,8 +214,7 @@ class Scheduler:
                         clean_exit = True
                         break
 
-                    time.sleep(sleep_time) # TODO: Maybe add sleeper task
-                    # TODO: What if at this point there is something left in self.selector?
+                    time.sleep(sleep_time)
         
         if clean_exit:
             Cleaner().run()

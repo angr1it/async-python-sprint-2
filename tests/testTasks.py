@@ -1,27 +1,14 @@
 import unittest
 import shutil
-import json
-from typing import *
-import os
 import filecmp
 
-from schedule.tasks.bestjourney import BestJourney
 from schedule.tasks.dataanalyze import DataAnalyze
-from schedule.tasks.foldermaster import FolderMaster   
-from schedule.tasks.sleeper import Sleeper
-from schedule.tasks.breaker import Breaker
-from schedule.job import Job
-
-from schedule.state import SchedulerState
-
 
 class TestTasks(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree('tests/test_results')
-        pass
     
-
     def test_analyze(self):
 
         job = DataAnalyze('tests/test_data/raw', 'tests/test_results', status_folder = 'tests/test_results/state')

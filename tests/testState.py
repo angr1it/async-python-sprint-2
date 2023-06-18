@@ -15,8 +15,7 @@ from schedule.state import SchedulerState
 class TestScheduler(unittest.TestCase):
 
     def tearDown(self) -> None:
-        #shutil.rmtree('tests/test_results')
-        pass
+        shutil.rmtree('tests/test_results')
     
     def __assert_dump_dict(self, result: dict, expected: dict, stage: str = 'waiting') -> None:
         result_list = result[stage]

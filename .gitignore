@@ -143,4 +143,5 @@ dmypy.json
 
 data
 status
-.vscode/*
+.vscode
+tests/test_results
